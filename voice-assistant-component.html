@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Assistant Component</title>
+    <style>
+        /* Component wrapper - use this class on your container */
+        .voice-assistant-component {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: black;
+            padding: 48px 24px;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .voice-assistant-component * {
+            box-sizing: border-box;
+        }
+
+        .voice-assistant-component .va-container {
+            width: 100%;
+            max-width: 896px;
+            margin: 0 auto;
+        }
+
+        .voice-assistant-component .va-canvas-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .voice-assistant-component .va-canvas {
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        .voice-assistant-component .va-header {
+            text-align: center;
+            margin-bottom: 32px;
+            margin-top: 24px;
+        }
+
+        .voice-assistant-component .va-main-heading {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 300;
+            color: white;
+            margin-bottom: 24px;
+            background: linear-gradient(to right, #c084fc, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .voice-assistant-component .va-subtitle {
+            color: #9ca3af;
+            font-size: clamp(14px, 2vw, 18px);
+            max-width: 512px;
+            margin: 0 auto;
+        }
+
+        .voice-assistant-component .va-input-wrapper {
+            position: relative;
+            max-width: 768px;
+            margin: 0 auto;
+        }
+
+        .voice-assistant-component .va-input-container {
+            position: relative;
+            background-color: rgba(17, 24, 39, 0.8);
+            border-radius: 24px;
+            border: 1px solid #4b5563;
+            transition: all 0.3s;
+        }
+
+        .voice-assistant-component .va-input-container.focused {
+            border-color: #9333ea;
+            box-shadow: 0 0 40px rgba(147, 51, 234, 0.3);
+        }
+
+        .voice-assistant-component .va-placeholder-text {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            right: 64px;
+            pointer-events: none;
+            color: #6b7280;
+            font-size: 18px;
+            display: none;
+        }
+
+        .voice-assistant-component .va-placeholder-text.visible {
+            display: block;
+        }
+
+        .voice-assistant-component .va-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 20px;
+            background-color: #6b7280;
+            margin-left: 2px;
+            animation: va-pulse 1s infinite;
+        }
+
+        @keyframes va-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .voice-assistant-component .va-textarea {
+            width: 100%;
+            background-color: transparent;
+            color: white;
+            padding: 24px 64px 24px 24px;
+            resize: none;
+            outline: none;
+            font-size: 18px;
+            min-height: 120px;
+            font-family: inherit;
+            border: none;
+        }
+
+        .voice-assistant-component .va-send-button {
+            position: absolute;
+            right: 16px;
+            top: 24px;
+            width: 40px;
+            height: 40px;
+            padding: 8px;
+            background-color: #4b5563;
+            border-radius: 8px;
+            border: none;
+            cursor: not-allowed;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .voice-assistant-component .va-send-button.active {
+            background-color: #9333ea;
+            cursor: pointer;
+        }
+
+        .voice-assistant-component .va-send-button:hover.active {
+            background-color: #7c3aed;
+        }
+
+        .voice-assistant-component .va-add-document-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #a78bfa;
+            margin-top: 16px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: inherit;
+        }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background: #0a0a0a;">
+    
+    <!-- VOICE ASSISTANT COMPONENT - Copy everything inside this div to embed in your site -->
+    <div class="voice-assistant-component" id="voiceAssistant">
+        <div class="va-container">
+            <!-- Canvas for animated orb -->
+            <div class="va-canvas-container">
+                <canvas class="va-canvas" width="280" height="200"></canvas>
+            </div>
+
+            <!-- Main Heading -->
+            <div class="va-header">
+                <h1 class="va-main-heading">What can I help with?</h1>
+                <p class="va-subtitle">
+                    Your AI assistant for TikTok Shop automation, market research, and tax management - all in one place
+                </p>
+            </div>
+
+            <!-- Input Area -->
+            <div class="va-input-wrapper">
+                <div class="va-input-container">
+                    <div class="va-placeholder-text">
+                        <span class="va-typing-text"></span><span class="va-cursor"></span>
+                    </div>
+                    
+                    <textarea
+                        class="va-textarea"
+                        placeholder=""
+                        rows="3"
+                    ></textarea>
+                    
+                    <button class="va-send-button">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+
+                <button class="va-add-document-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Add document</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- END VOICE ASSISTANT COMPONENT -->
+
+    <script>
+        // Voice Assistant Component Script
+        (function() {
+            const component = document.getElementById('voiceAssistant');
+            if (!component) return;
+
+            // Get elements within this component instance
+            const canvas = component.querySelector('.va-canvas');
+            const ctx = canvas.getContext('2d');
+            const inputContainer = component.querySelector('.va-input-container');
+            const inputTextarea = component.querySelector('.va-textarea');
+            const sendButton = component.querySelector('.va-send-button');
+            const placeholderText = component.querySelector('.va-placeholder-text');
+            const typingText = component.querySelector('.va-typing-text');
+
+            // State variables
+            let input = '';
+            let isInputFocused = false;
+            let isListening = false;
+            
+            // Canvas and animation refs
+            let animationId = 0;
+            let particles = [];
+            let time = 0;
+            let mousePosition = { x: 0, y: 0 };
+            let currentRotation = { x: 0, y: 0 };
+            let targetRotation = { x: 0, y: 0 };
+            let isHovering = false;
+            let rippleIntensity = 0;
+
+            // Sample prompts for typing animation
+            const samplePrompts = [
+                "Find trending products and create listings for my TikTok Shop",
+                "Analyze my top sellers and launch a Promote campaign",
+                "Calculate Q4 taxes and schedule the payment",
+                "Research competitor prices and adjust my pricing strategy",
+                "Pull last month's expenses and file my tax deduction report",
+                "Identify viral products in beauty and order supplier samples",
+                "Review all transactions and update my bookkeeping",
+                "Find my best performing videos and boost them with $500 budget"
+            ];
+
+            // Typing animation
+            let typeTimeoutId = null;
+            let currentText = '';
+            let isDeleting = false;
+            let promptIndex = 0;
+
+            function typeText() {
+                if (isInputFocused || input !== '') {
+                    placeholderText.classList.remove('visible');
+                    return;
+                }
+
+                const currentPrompt = samplePrompts[promptIndex];
+                
+                if (!isDeleting) {
+                    if (currentText.length < currentPrompt.length) {
+                        currentText = currentPrompt.slice(0, currentText.length + 1);
+                        typingText.textContent = currentText;
+                        placeholderText.classList.add('visible');
+                        typeTimeoutId = setTimeout(typeText, 50 + Math.random() * 50);
+                    } else {
+                        isDeleting = true;
+                        typeTimeoutId = setTimeout(typeText, 2000);
+                    }
+                } else {
+                    if (currentText.length > 0) {
+                        currentText = currentText.slice(0, -1);
+                        typingText.textContent = currentText;
+                        typeTimeoutId = setTimeout(typeText, 30);
+                    } else {
+                        isDeleting = false;
+                        promptIndex = (promptIndex + 1) % samplePrompts.length;
+                        typeTimeoutId = setTimeout(typeText, 500);
+                    }
+                }
+            }
+
+            // Initialize particles
+            function initParticles() {
+                particles = [];
+                const totalCount = 3000;
+                
+                for (let i = 0; i < totalCount; i++) {
+                    const phi = Math.acos(1 - 2 * i / totalCount);
+                    const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+                    
+                    particles.push({
+                        x: Math.sin(phi) * Math.cos(theta),
+                        y: Math.sin(phi) * Math.sin(theta),
+                        z: Math.cos(phi),
+                        randomFreq: 1 + Math.random() * 0.4,
+                        randomPhase: Math.random() * Math.PI * 2,
+                        randomAmplitude: 0.5 + Math.random() * 0.5
+                    });
+                }
+            }
+
+            // Draw orb animation
+            function drawOrb() {
+                const width = 280;
+                const height = 200;
+                const centerX = width / 2;
+                const centerY = height / 2;
+                const baseRadius = 80;
+                
+                time += 0.015;
+                
+                // Smooth ripple intensity transition
+                if (isHovering) {
+                    rippleIntensity = Math.min(1, rippleIntensity + 0.05);
+                } else {
+                    rippleIntensity = Math.max(0, rippleIntensity - 0.03);
+                }
+                
+                // Mouse rotation
+                const mouseX = (mousePosition.x - centerX) / width;
+                const mouseY = (mousePosition.y - centerY) / height;
+                targetRotation.x = mouseY * 0.5;
+                targetRotation.y = -mouseX * 0.5;
+                
+                currentRotation.x += (targetRotation.x - currentRotation.x) * 0.1;
+                currentRotation.y += (targetRotation.y - currentRotation.y) * 0.1;
+                
+                // Clear canvas
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, width, height);
+                
+                // Draw particles
+                const particleData = [];
+                
+                // Calculate mouse position in 3D space
+                const mouseNormX = (mousePosition.x - centerX) / baseRadius;
+                const mouseNormY = (mousePosition.y - centerY) / baseRadius;
+                
+                particles.forEach((particle) => {
+                    const { x, y, z, randomFreq, randomPhase, randomAmplitude } = particle;
+                    
+                    // Rotation
+                    const rotationY = time * 0.3 * randomFreq + currentRotation.y;
+                    const rotationX = Math.sin(time * 0.2 * randomFreq) * 0.1 + currentRotation.x;
+                    
+                    const cosY = Math.cos(rotationY);
+                    const sinY = Math.sin(rotationY);
+                    const cosX = Math.cos(rotationX);
+                    const sinX = Math.sin(rotationX);
+                    
+                    let x1 = x * cosY - z * sinY;
+                    let z1 = x * sinY + z * cosY;
+                    let y1 = y * cosX - z1 * sinX;
+                    let z2 = y * sinX + z1 * cosX;
+                    
+                    // Calculate distance from mouse for ripple effect
+                    const dx = x1 - mouseNormX;
+                    const dy = y1 - mouseNormY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Create ripple wave
+                    const waveTime = time * 3;
+                    const waveDistance = distance * 8;
+                    const wave = Math.sin(waveDistance - waveTime + randomPhase) * randomAmplitude;
+                    
+                    // Apply ripple displacement
+                    const rippleStrength = Math.exp(-distance * 2) * rippleIntensity;
+                    const displacement = wave * rippleStrength * 0.3;
+                    
+                    // Apply displacement in the direction away from cursor
+                    if (distance > 0.01) {
+                        x1 += (dx / distance) * displacement;
+                        y1 += (dy / distance) * displacement;
+                        z2 += wave * rippleStrength * 0.1;
+                    }
+                    
+                    // Breathing effect
+                    const breathing = 1 + Math.sin(time * 0.8) * 0.05;
+                    
+                    const finalX = x1 * baseRadius * breathing;
+                    const finalY = y1 * baseRadius * breathing;
+                    const finalZ = z2;
+                    
+                    // 3D to 2D projection
+                    const perspective = 2 / (3 + finalZ);
+                    const screenX = centerX + finalX * perspective;
+                    const screenY = centerY + finalY * perspective;
+                    
+                    // Enhanced color gradient with ripple effect
+                    const gradientFactor = (y + 1) / 2;
+                    const rippleColorBoost = rippleStrength * 50;
+                    const r = 120 + gradientFactor * 108 + rippleColorBoost;
+                    const g = 100 + gradientFactor * 50 + rippleColorBoost * 0.5;
+                    const b = 220 - gradientFactor * 20 + rippleColorBoost * 0.8;
+                    
+                    const size = perspective * 1.5 * (1 + rippleStrength * 0.3);
+                    const alpha = perspective * 0.7 * (1 - Math.abs(finalZ) / 2) * (1 + rippleStrength * 0.3);
+                    
+                    particleData.push({
+                        x: screenX,
+                        y: screenY,
+                        z: finalZ,
+                        color: `rgba(${Math.min(255, Math.floor(r))}, ${Math.min(255, Math.floor(g))}, ${Math.min(255, Math.floor(b))}, ${Math.min(1, alpha)})`,
+                        size
+                    });
+                });
+                
+                // Sort by depth
+                particleData.sort((a, b) => b.z - a.z);
+                
+                // Draw particles
+                particleData.forEach(({ x, y, color, size }) => {
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                
+                // Enhanced glow effect when hovering
+                const glowIntensity = 0.08 + rippleIntensity * 0.12;
+                const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, baseRadius * 1.5);
+                gradient.addColorStop(0, `rgba(147, 51, 234, ${glowIntensity})`);
+                gradient.addColorStop(0.5, `rgba(147, 51, 234, ${glowIntensity * 0.5})`);
+                gradient.addColorStop(1, 'rgba(147, 51, 234, 0)');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, width, height);
+                
+                animationId = requestAnimationFrame(drawOrb);
+            }
+
+            // Event handlers
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mousePosition = {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            });
+
+            canvas.addEventListener('mouseenter', () => {
+                isHovering = true;
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                isHovering = false;
+            });
+
+            canvas.addEventListener('click', () => {
+                isListening = !isListening;
+                console.log('Listening:', isListening);
+            });
+
+            inputTextarea.addEventListener('input', (e) => {
+                input = e.target.value;
+                if (input.trim()) {
+                    sendButton.classList.add('active');
+                } else {
+                    sendButton.classList.remove('active');
+                }
+                if (input !== '') {
+                    placeholderText.classList.remove('visible');
+                }
+            });
+
+            inputTextarea.addEventListener('focus', () => {
+                isInputFocused = true;
+                inputContainer.classList.add('focused');
+                placeholderText.classList.remove('visible');
+                inputTextarea.placeholder = "Ask me anything...";
+            });
+
+            inputTextarea.addEventListener('blur', () => {
+                isInputFocused = false;
+                inputContainer.classList.remove('focused');
+                inputTextarea.placeholder = "";
+                if (input === '') {
+                    typeText();
+                }
+            });
+
+            inputTextarea.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit();
+                }
+            });
+
+            sendButton.addEventListener('click', handleSubmit);
+
+            function handleSubmit() {
+                if (input.trim()) {
+                    console.log('Submitted:', input);
+                    inputTextarea.value = '';
+                    input = '';
+                    sendButton.classList.remove('active');
+                }
+            }
+
+            // Initialize
+            initParticles();
+            drawOrb();
+            typeText();
+        })();
+    </script>
+</body>
+</html>
